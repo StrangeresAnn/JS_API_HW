@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фото</title>
+    <style>
+        #photo-img{
+            width: 50%;
+            height: auto; 
+        }
+        .photo img {
+            width: 50%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="photo-container">
+        <img id="photo-img" alt=""><br>
+        <p id="photographer"></p>
+        <button type="button" class="like-button">Поставь лайк!</button>
+        <p>Всего лайков: <span id="number-likes"></span></p>
+        
+    </div>
+    <button type="button" class="fotoStory-button">Просмотр фото-истории </button>
+    <ul class="fotoStory"></ul>
+
+    <script>
+        const photoContainer = document.getElementById('photo-container');
+        const photoImg=document.querySelector('#photo-img');
+        const photographerName=document.getElementById('photographer');
+        const buttonLike=document.querySelector('.like-button');
+        const numberLikes=document.getElementById('number-likes');
+        const buttonFotoStory=document.querySelector('.fotoStory-button');
+        const storyFoto=document.querySelector('.fotoStory');
+
+        numberLikes.textContent=localStorage.getItem('likes');
+
+      
+        async function fetchPhotos() {
+            try {               
+                const response = await fetch(`https://api.unsplash.com/photos?client_id=KARWxYq2h41qQkKbIljkIPhPS1YqK2-DpdEPHFlxJl4`);
+                const photos = await response.json();
+                return photos;
+            } catch (error) {
+                console.error('Ошибка при загрузке фотографий:', error);
+                return [];
+            }
+        }
+        
+        async function loadPhoto() {
+            const photos = await fetchPhotos();
+                       
+            const photoRandom=photos[parseInt(Math.random()*photos.length)];
+            
+            photoImg.src=photoRandom.urls.small;
+            photoImg.alt=photoRandom.alt_description;
+            photographerName.textContent=`Имя фотографа: ${photoRandom.user.name}`;
+
+            const listPhoto=document.createElement('ul');
+            if(localStorage.getItem('photos')){
+                listPhoto.innerHTML=localStorage.getItem('photos');
+            }
+ 
+            const photoElement = document.createElement('li');
+            photoElement.classList.add('photo');
+            const img = document.createElement('img');
+            img.src = photoRandom.urls.small;
+            img.alt = photoRandom.alt_description;
+            photoElement.appendChild(img);
+            listPhoto.append(photoElement);
+            localStorage.setItem('photos',listPhoto.innerHTML);
+        }
+        
+        buttonLike.addEventListener('click',function () {
+            
+            if(numberLikes.textContent===""){
+                numberLikes.textContent=0;
+                console.log(parseInt(numberLikes.textContent));
+                numberLikes.textContent=parseInt(numberLikes.textContent)+1;
+            }else{
+                numberLikes.textContent=parseInt(numberLikes.textContent)+1;
+            }
+            localStorage.setItem('likes',numberLikes.textContent);            
+        });
+
+        buttonFotoStory.addEventListener('click',function(){
+            storyFoto.innerHTML=localStorage.getItem('photos');
+        });
+ 
+        loadPhoto();
+    </script>
+</body>
+</html>
